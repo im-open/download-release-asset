@@ -1,22 +1,43 @@
-name: 'Composite Run Steps Action Template'
+name: 'download-release-asset'
 
-description: 'Add description here'
+description: 'Download an asset from a GitHub Release'
 
 inputs:
-  input-1:
-    description: 'Add a description here'
+  github-token:
+    description: 'A token with permission to download assets from repository releases'
     required: true
-
-outputs:
-  output-1:
-    description: 'Add description here'
-    value: '${{ steps.step_1.outputs.world }}'
+  asset-name:
+    description: 'The name of the release asset'
+    required: true
+  tag-name:
+    description: 'The tag associated with the release that contains the asset to download'
+    required: true
 
 runs:
   using: 'composite'
   steps:
-    - name: Step 1
-      id: step_1
+    - name: Download Asset
       shell: bash
       run: |
-        echo "::set-output name=hello::world"
+        # Script to download asset file from tag release using GitHub API v3.
+        # See: http://stackoverflow.com/a/35688093/55075    
+
+        # Define variables.
+        name='${{ inputs.asset-name }}'
+        GH_REPO="https://api.github.com/repos/${{ github.repository }}"
+        GH_TAGS="$GH_REPO/releases/tags/${{ inputs.tag-name }}"
+        AUTH="Authorization: token ${{ inputs.github-token }}"
+        WGET_ARGS="--content-disposition --auth-no-challenge --no-cookie"
+        CURL_ARGS="-LJO#"
+
+        # Read asset tags.
+        response=$(curl -sH "$AUTH" $GH_TAGS)
+
+        # Get ID of the asset based on given name.
+        eval $(echo "$response" | grep -C3 "name.:.\+$name" | grep -w id | tr : = | tr -cd '[[:alnum:]]=')
+        [ "$id" ] || { echo "Error: Failed to get asset id, response: $response" | awk 'length($0)<100' >&2; exit 1; }
+        GH_ASSET="$GH_REPO/releases/assets/$id"
+
+        # Download asset file.
+        echo "Downloading asset..." >&2
+        curl $CURL_ARGS -H "Authorization: token ${{ inputs.github-token }}" -H 'Accept: application/octet-stream' "$GH_ASSET"
