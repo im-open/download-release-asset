@@ -28,7 +28,7 @@ runs:
         GH_TAGS="$GH_REPO/releases/tags/${{ inputs.tag-name }}"
         AUTH="Authorization: token ${{ inputs.github-token }}"
         WGET_ARGS="--content-disposition --auth-no-challenge --no-cookie"
-        CURL_ARGS="-LJO#"
+        CURL_ARGS="-LJO#f"
 
         # Read asset tags.
         response=$(curl -sH "$AUTH" $GH_TAGS)
