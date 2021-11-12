@@ -26,7 +26,7 @@ deploy-code:
 
     steps:
       - name: Download artifacts from release
-        uses: im-open/download-release-asset@v1.0.0
+        uses: im-open/download-release-asset@v1.0.1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           asset-name: ${{ env.ASSET_ZIP }}
