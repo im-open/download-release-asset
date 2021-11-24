@@ -2,6 +2,8 @@
 
 This action can be used to download an asset from a GitHub release.  The GitHub release where the artifacts will be download from are identified by tag which is provided as an argument to the action.  The action downloads the release asset to the root of the workspace.
 
+## Index
+
 - [Inputs](#inputs)
 - [Outputs](#outputs)
 - [Example](#example)
