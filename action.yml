@@ -12,6 +12,9 @@ inputs:
   tag-name:
     description: 'The tag associated with the release that contains the asset to download'
     required: true
+  repository:
+    description: 'If not provided, defaults to the repo where the action is being used'
+    required: false
 
 runs:
   using: 'composite'
@@ -24,8 +27,8 @@ runs:
 
         # Define variables.
         name='${{ inputs.asset-name }}'
-        GH_REPO="https://api.github.com/repos/${{ github.repository }}"
-        GH_TAGS="$GH_REPO/releases/tags/${{ inputs.tag-name }}"
+        GH_REPO="https://api.github.com/repos/${{ inputs.repository || github.repository }}"
+        GH_TAGS="$GH_REPO/releases/${{ (inputs.tag-name == 'latest' && 'latest') || format('tags/{0}', inputs.tag-name) }}"
         AUTH="Authorization: token ${{ inputs.github-token }}"
         WGET_ARGS="--content-disposition --auth-no-challenge --no-cookie"
         CURL_ARGS="-LJO#f"
