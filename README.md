@@ -14,11 +14,12 @@ This action can be used to download an asset from a GitHub release.  The GitHub 
 
 ## Inputs
 
-| Parameter      | Is Required | Description                                                             |
-| -------------- | ----------- | ----------------------------------------------------------------------- |
-| `github-token` | true        | A token with permission to download assets from repository releases     |
-| `asset-name`   | true        | The name of the release asset                                           |
-| `tag-name`     | true        | The tag associated with the release that contains the asset to download |
+| Parameter      | Is Required | Default | Description                                                             |
+| -------------- | ----------- |         | ----------------------------------------------------------------------- |
+| `github-token` | true        |         | A token with permission to download assets from repository releases. Provide your own PAT with permissions to your repository if a different org/repo is provided. |
+| `asset-name`   | true        |         | The name of the release asset.                                           |
+| `tag-name`     | true        |         | The tag associated with the release that contains the asset to download. You may also use the tag name "latest". |
+| `repository`   | false       | `github.repository` | organization/repository. If not provided, defaults to the repo where the action is being used. |
 
 ## Outputs
 
@@ -45,9 +46,17 @@ deploy-code:
       - name: Unzip release asset
         run: unzip -qq ${{ env.ASSET_ZIP }} -d ./${{ env.UNZIPPED_ASSET }}
 
+      # ----
+      - name: Download artifacts from latest release in a different repo
+        uses: im-open/download-release-asset@v1.1.0
+        with:
+          github-token: ${{ secrets.PERSONAL_PAT }} # GitHub PAT that has permissions to the org/repo
+          asset-name: ${{ env.ASSET_ZIP }}
+          tag-name: latest
+          repository: im-enrollment/repo-with-release
+
      ...
 ```
-
 
 ## Contributing
 
