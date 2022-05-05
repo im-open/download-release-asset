@@ -14,12 +14,12 @@ This action can be used to download an asset from a GitHub release.  The GitHub 
 
 ## Inputs
 
-| Parameter      | Is Required | Default | Description                                                             |
-| -------------- | ----------- |         | ----------------------------------------------------------------------- |
-| `github-token` | true        |         | A token with permission to download assets from repository releases. Provide your own PAT with permissions to your repository if a different org/repo is provided. |
-| `asset-name`   | true        |         | The name of the release asset.                                           |
-| `tag-name`     | true        |         | The tag associated with the release that contains the asset to download. You may also use the tag name "latest". |
-| `repository`   | false       | `github.repository` | organization/repository. If not provided, defaults to the repo where the action is being used. |
+| Parameter      | Is Required | Default                                                                             | Description                                                                                                                                                                                                                                                                       |
+| -------------- | ----------- | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `github-token` | true        | N/A                                                                                 | A token with permission to download assets from repository releases. When downloading from the repository the action is running in `secrets.GITHUB_TOKEN` is sufficient.  If downloading from a separate repo, a different token with permission to that repo should be provided. |
+| `asset-name`   | true        | N/A                                                                                 | The name of the release asset.                                                                                                                                                                                                                                                    |
+| `tag-name`     | true        | N/A                                                                                 | The tag associated with the release that contains the asset to download. You may also use the tag name `latest`.                                                                                                                                                                  |
+| `repository`   | false       | `github.repository`<br/> <i>The organization/repository where the action is run</i> | The organization/repository to download the release asset from.                                                                                                                                                                                                                   |
 
 ## Outputs
 
