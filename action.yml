@@ -13,7 +13,7 @@ inputs:
     description: 'The tag associated with the release that contains the asset to download. You may also use the tag name "latest".'
     required: true
   repository:
-    description: 'organization/repository. If not provided, defaults to github.repository'
+    description: 'The organization/repository to download the release asset from.  If not provided, defaults to github.repository'
     required: false
 
 runs:
