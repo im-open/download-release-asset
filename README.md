@@ -23,9 +23,9 @@ This action can be used to download an asset from a GitHub release.  The GitHub 
 
 ## Outputs
 
-| Name               | Description                           |
-| ------------------ | ------------------------------------- |
-| `downloaded-asset` | Absolute path to the downloaded asset |
+| Name                 | Description                           |
+| -------------------- | ------------------------------------- |
+| `download-file-path` | Absolute path to the downloaded asset |
 
 ## Example
 

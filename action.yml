@@ -17,9 +17,9 @@ inputs:
     required: false
 
 outputs:
-  download-asset: 
+  download-file-path: 
     description: 'Full file path of download asset'
-    value: ${{ steps.download.outputs.download_asset }}
+    value: ${{ steps.download.outputs.download_file_path }}
 
 runs:
   using: 'composite'
@@ -52,5 +52,5 @@ runs:
         curl $CURL_ARGS -H "Authorization: token ${{ inputs.github-token }}" -H 'Accept: application/octet-stream' "$GH_ASSET"
 
         base_path=$(pwd)
-        config_file_path="$base_path/${{ inputs.asset-name }}
-        echo "::set-output name=download_asset::$config_file_path"
+        download_file_path="$base_path/${{ inputs.asset-name }}
+        echo "::set-output name=download_file_path::$download_file_path"
