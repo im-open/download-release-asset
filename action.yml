@@ -16,10 +16,16 @@ inputs:
     description: 'The organization/repository to download the release asset from.  If not provided, defaults to github.repository'
     required: false
 
+outputs:
+  download-file-path: 
+    description: 'Full file path of download asset'
+    value: ${{ steps.download.outputs.download_file_path }}
+
 runs:
   using: 'composite'
   steps:
     - name: Download Asset
+      id: download
       shell: bash
       run: |
         # Script to download asset file from tag release using GitHub API v3.
@@ -44,3 +50,7 @@ runs:
         # Download asset file.
         echo "Downloading asset..." >&2
         curl $CURL_ARGS -H "Authorization: token ${{ inputs.github-token }}" -H 'Accept: application/octet-stream' "$GH_ASSET"
+
+        base_path=$(pwd)
+        download_file_path="$base_path/${{ inputs.asset-name }}
+        echo "::set-output name=download_file_path::$download_file_path"

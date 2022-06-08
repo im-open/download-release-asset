@@ -23,7 +23,9 @@ This action can be used to download an asset from a GitHub release.  The GitHub 
 
 ## Outputs
 
-No Outputs
+| Name                 | Description                           |
+| -------------------- | ------------------------------------- |
+| `download-file-path` | Absolute path to the downloaded asset |
 
 ## Example
 
@@ -48,7 +50,7 @@ deploy-code:
 
       # ----
       - name: Download artifacts from latest release in a different repo
-        uses: im-open/download-release-asset@v1.1.0
+        uses: im-open/download-release-asset@v1.1.1
         with:
           github-token: ${{ secrets.PERSONAL_PAT }} # GitHub PAT that has permissions to the org/repo
           asset-name: ${{ env.ASSET_ZIP }}
