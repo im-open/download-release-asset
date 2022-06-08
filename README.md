@@ -50,7 +50,7 @@ deploy-code:
 
       # ----
       - name: Download artifacts from latest release in a different repo
-        uses: im-open/download-release-asset@v1.1.1
+        uses: im-open/download-release-asset@v1.1.2
         with:
           github-token: ${{ secrets.PERSONAL_PAT }} # GitHub PAT that has permissions to the org/repo
           asset-name: ${{ env.ASSET_ZIP }}
