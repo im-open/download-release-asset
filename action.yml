@@ -53,4 +53,4 @@ runs:
 
         base_path=$(pwd)
         download_file_path="$base_path/${{ inputs.asset-name }}"
-        echo "::set-output name=download_file_path::$download_file_path"
+        echo "download_file_path=$download_file_path" >> $GITHUB_OUTPUT
