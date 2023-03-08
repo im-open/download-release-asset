@@ -40,7 +40,7 @@ deploy-code:
     steps:
       - name: Download artifacts from release
         # You may also reference just the major or major.minor version
-        uses: im-open/download-release-asset@v1.2.0
+        uses: im-open/download-release-asset@v1.2.1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           asset-name: ${{ env.ASSET_ZIP }}
@@ -51,7 +51,7 @@ deploy-code:
 
       # ----
       - name: Download artifacts from latest release in a different repo
-        uses: im-open/download-release-asset@v1.2.0
+        uses: im-open/download-release-asset@v1.2.1
         with:
           github-token: ${{ secrets.PERSONAL_PAT }} # GitHub PAT that has permissions to the org/repo
           asset-name: ${{ env.ASSET_ZIP }}
