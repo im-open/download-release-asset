@@ -1,6 +1,5 @@
-name: 'download-release-asset'
-
-description: 'Download an asset from a GitHub Release'
+name: download-release-asset
+description: Download an asset from a GitHub Release
 
 inputs:
   github-token:
