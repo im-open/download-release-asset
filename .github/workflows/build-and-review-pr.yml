@@ -124,10 +124,10 @@ jobs:
       - name: And the asset contents should match the uploaded asset
         if: always()
         run: |
-          diff=$(diff ${{ steps.download-with-name.outputs.download_file_path }} ./test/files/test-asset.txt)
-          if [ "$diff" != "" ]; then
+          diffResults=$(diff ${{ steps.download-with-name.outputs.download_file_path }} ./test/files/test-asset.txt)
+          if [ "$diffResults" != "" ]; then
             echo "The downloaded asset content does not match the uploaded asset contents."
-            echo "Diff: $diff"
+            echo "Diff: $diffResults"
             exit 1
           else
             echo "The downloaded asset contents matches the uploaded asset contents."
@@ -165,10 +165,10 @@ jobs:
       - name: And the asset contents should match the uploaded asset
         if: always()
         run: |
-          diff=$(diff ${{ steps.download-no-name.outputs.download_file_path }} ./test/files/test-asset.txt)
-          if [ "$diff" != "" ]; then
+          diffResults=$(diff ${{ steps.download-no-name.outputs.download_file_path }} ./test/files/test-asset.txt)
+          if [ "$diffResults" != "" ]; then
             echo "The downloaded asset content does not match the uploaded asset contents."
-            echo "Diff: $diff"
+            echo "Diff: $diffResults"
             exit 1
           else
             echo "The downloaded asset contents matches the uploaded asset contents."
