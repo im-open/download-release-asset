@@ -60,3 +60,178 @@ jobs:
       # The npm script to run to build the action.  This is typically 'npm run build' if the
       # action needs to be compiled.  For composite-run-steps actions this is typically empty.
       build-command: ''
+
+  test:
+    runs-on: ubuntu-latest
+
+    env:
+      COMMITISH: '574597c0dfddc1fd1abcb99f368b156c78dadbe0' # v1.2.1
+      REPO: 'im-open/download-release-asset'
+      RELEASE_TAG: ''
+      ASSET_NAME: ''
+
+    steps:
+      #--------------------------------------
+      # SETUP
+      #--------------------------------------
+      - name: Setup - Checkout the action
+        uses: actions/checkout@v3
+
+      - name: Setup - Dynamically generate a tag for the release & asset name
+        run: |
+          tag=$(date +'%Y%m%d%H%M%S')
+          echo "RELEASE_TAG=downloadTest_$tag" >> $GITHUB_ENV
+          echo "ASSET_NAME=my_test_asset_$tag.txt" >> $GITHUB_ENV
+
+      - name: Setup - Create a release with an asset
+        uses: im-open/create-release@v3
+        id: release
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          tag-name: ${{ env.RELEASE_TAG }}
+          commitish: ${{ env.COMMITISH }}
+          asset-path: './test/files/test-asset.txt'
+          asset-name: ${{ env.ASSET_NAME }}
+          asset-content-type: 'application/text'
+
+      #--------------------------------------
+      # DOWNLOAD WITH A REPO NAME
+      #--------------------------------------
+      - name: '-------------------------------------------------------------------------------------------------------'
+        run: echo ""
+      - name: When downloading an asset and providing a repo name
+        uses: ./
+        if: always()
+        id: download-with-name
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          asset-name: ${{ env.ASSET_NAME }}
+          tag-name: ${{ env.RELEASE_TAG }}
+          repository: ${{ env.REPO }}
+
+      - name: Then the outcome should be success
+        if: always()
+        run: ./test/assert-values-match.sh --name "step outcome" --expected "success" --actual "${{ steps.download-with-name.outcome }}"
+
+      - name: And the asset should exist in the current working directory
+        if: always()
+        run: |
+          if [ ! -f ${{ steps.download-with-name.outputs.download_file_path }} ]; then
+            echo "The asset does not exist at the expected location: ${{ steps.download-with-name.outputs.download_file_path }}"
+            exit 1
+          fi
+
+      - name: And the asset contents should match the uploaded asset
+        if: always()
+        run: |
+          diff=$(diff ${{ steps.download-with-name.outputs.download_file_path }} ./test/files/test-asset.txt)
+          if [ "$diff" != "" ]; then
+            echo "The downloaded asset content does not match the uploaded asset contents."
+            echo "Diff: $diff"
+            exit 1
+          else
+            echo "The downloaded asset contents matches the uploaded asset contents."
+          fi
+          rm -f ${{ steps.download-with-name.outputs.download_file_path }}
+
+      #--------------------------------------
+      # DOWNLOAD WITHOUT A REPO NAME
+      #--------------------------------------
+      - name: '-------------------------------------------------------------------------------------------------------'
+        run: echo ""
+
+      - name: When downloading an asset without providing a repo name
+        uses: ./
+        if: always()
+        id: download-no-name
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          asset-name: ${{ env.ASSET_NAME }}
+          tag-name: ${{ env.RELEASE_TAG }}
+          repository: ''
+
+      - name: Then the outcome should be success
+        if: always()
+        run: ./test/assert-values-match.sh --name "step outcome" --expected "success" --actual "${{ steps.download-no-name.outcome }}"
+
+      - name: And the asset should exist in the current working directory
+        if: always()
+        run: |
+          if [ ! -f ${{ steps.download-no-name.outputs.download_file_path }} ]; then
+            echo "The asset does not exist at the expected location: ${{ steps.download-no-name.outputs.download_file_path }}"
+            exit 1
+          fi
+
+      - name: And the asset contents should match the uploaded asset
+        if: always()
+        run: |
+          diff=$(diff ${{ steps.download-no-name.outputs.download_file_path }} ./test/files/test-asset.txt)
+          if [ "$diff" != "" ]; then
+            echo "The downloaded asset content does not match the uploaded asset contents."
+            echo "Diff: $diff"
+            exit 1
+          else
+            echo "The downloaded asset contents matches the uploaded asset contents."
+          fi
+          rm -f ${{ steps.download-with-name.outputs.download_file_path }}
+
+      #-------------------------------------------------------------------
+      # DOWNLOAD FROM AN EXISTING RELEASE BUT AN ASSET THAT DOES NOT EXIST
+      #-------------------------------------------------------------------
+      - name: '-------------------------------------------------------------------------------------------------------'
+        run: echo ""
+
+      - name: When downloading an asset that does not exist
+        uses: ./
+        if: always()
+        id: non-existent-asset
+        continue-on-error: true # This is needed because we expect the step to fail.  We need it to "pass" in order for the test job to succeed.
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          asset-name: 'abc-123-asset.prw' # This does not exist
+          tag-name: '${{ env.RELEASE_TAG }}'
+          repository: ${{ env.REPO }}
+
+      - name: Then the outcome should be failure
+        if: always()
+        run: ./test/assert-values-match.sh --name "step outcome" --expected "failure" --actual "${{ steps.non-existent-asset.outcome }}"
+
+      #--------------------------------------------
+      # DOWNLOAD FROM A RELEASE THAT DOES NOT EXIST
+      #--------------------------------------------
+      - name: '-------------------------------------------------------------------------------------------------------'
+        run: echo ""
+
+      - name: When downloading an asset from a release that does not exist
+        uses: ./
+        if: always()
+        id: non-existent-release
+        continue-on-error: true # This is needed because we expect the step to fail.  We need it to "pass" in order for the test job to succeed.
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          asset-name: ${{ env.ASSET_NAME }}
+          tag-name: 'v00.00.123' # This does not exist
+          repository: ${{ env.REPO }}
+
+      - name: Then the outcome should be failure
+        if: always()
+        run: ./test/assert-values-match.sh --name "step outcome" --expected "failure" --actual "${{ steps.non-existent-release.outcome }}"
+
+      #--------------------------------------
+      # TEARDOWN
+      #--------------------------------------
+      - name: '-------------------------------------------------------------------------------------------------------'
+        run: echo ""
+      - name: Teardown - Cleanup all the releases by deleting them
+        if: always()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            // Not all of these will end up with a tag and a release, but run them all just in case any of the tests 
+            // fail unexpectedly.  We don't want a bunch of test releases and tags cluttering up the real thing.
+
+            const deleteReleaseFromGitHub = require('./test/api/delete-release-from-github.js')
+            await deleteReleaseFromGitHub(github, core, '${{ steps.release.outputs.release-id }}');
+
+            const deleteTagFromGitHub = require('./test/api/delete-tag-from-github.js')
+            await deleteTagFromGitHub(github, core, '${{ env.RELEASE_TAG }}');
