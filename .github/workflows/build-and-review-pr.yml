@@ -95,7 +95,7 @@ jobs:
           asset-path: './test/files/test-asset-1.txt'
           asset-name: ${{ env.ASSET_1_NAME }}
           asset-content-type: 'application/text'
-      
+
       - name: Upload a second asset
         uses: im-open/upload-release-asset@v1
         with:
@@ -120,16 +120,25 @@ jobs:
           tag-name: ${{ env.RELEASE_TAG }}
           repository: ${{ env.REPO }}
 
+      - name: print action outputs
+        if: always()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const outputs = JSON.parse(`${{ toJSON(steps.download-with-name.outputs) }}`);
+            console.log(outputs);
+
       - name: Then the outcome should be success
         if: always()
         run: ./test/assert-values-match.sh --name "step outcome" --expected "success" --actual "${{ steps.download-with-name.outcome }}"
 
       - name: And the asset should exist in the current working directory and the contents should match the uploaded asset
+        if: always()
         uses: actions/github-script@v6
         with:
           script: |
             const fs = require('fs');
-            const downloadFilePath = '${{ steps.download-with-name.outputs.download_file_path }}';
+            const downloadFilePath = '${{ steps.download-with-name.outputs.download-file-path }}';
 
             if (!fs.existsSync(downloadFilePath)) {
               core.setFailed(`The asset does not exist at the expected location: ${downloadFilePath}`);
@@ -148,7 +157,6 @@ jobs:
               core.info(`Content:\n"${expectedContent}"`);
             }
 
-      
       #--------------------------------------
       # DOWNLOAD WITHOUT A REPO NAME
       #--------------------------------------
@@ -165,16 +173,25 @@ jobs:
           tag-name: ${{ env.RELEASE_TAG }}
           repository: ''
 
+      - name: print action outputs
+        if: always()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const outputs = JSON.parse(`${{ toJSON(steps.download-no-name.outputs) }}`);
+            console.log(outputs);
+
       - name: Then the outcome should be success
         if: always()
         run: ./test/assert-values-match.sh --name "step outcome" --expected "success" --actual "${{ steps.download-no-name.outcome }}"
 
       - name: And the asset should exist in the current working directory and the contents should match the uploaded asset
+        if: always()
         uses: actions/github-script@v6
         with:
           script: |
             const fs = require('fs');
-            const downloadFilePath = '${{ steps.download-no-name.outputs.download_file_path }}';
+            const downloadFilePath = '${{ steps.download-no-name.outputs.download-file-path }}';
 
             if (!fs.existsSync(downloadFilePath)) {
               core.setFailed(`The asset does not exist at the expected location: ${downloadFilePath}`);
@@ -210,6 +227,14 @@ jobs:
           tag-name: '${{ env.RELEASE_TAG }}'
           repository: ${{ env.REPO }}
 
+      - name: print action outputs
+        if: always()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const outputs = JSON.parse(`${{ toJSON(steps.non-existent-asset.outputs) }}`);
+            console.log(outputs);
+
       - name: Then the outcome should be failure
         if: always()
         run: ./test/assert-values-match.sh --name "step outcome" --expected "failure" --actual "${{ steps.non-existent-asset.outcome }}"
@@ -230,6 +255,14 @@ jobs:
           asset-name: ${{ env.ASSET_1_NAME }}
           tag-name: 'v00.00.123' # This does not exist
           repository: ${{ env.REPO }}
+
+      - name: print action outputs
+        if: always()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const outputs = JSON.parse(`${{ toJSON(steps.non-existent-release.outputs) }}`);
+            console.log(outputs);
 
       - name: Then the outcome should be failure
         if: always()
