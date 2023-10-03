@@ -11,24 +11,26 @@ This action can be used to download an asset from a GitHub release.  The GitHub 
   - [Contributing](#contributing)
     - [Incrementing the Version](#incrementing-the-version)
     - [Source Code Changes](#source-code-changes)
+    - [Recompiling Manually](#recompiling-manually)
     - [Updating the README.md](#updating-the-readmemd)
   - [Code of Conduct](#code-of-conduct)
   - [License](#license)
 
 ## Inputs
 
-| Parameter      | Is Required | Default                                                                             | Description                                                                                                                                                                                                                                                                       |
-|----------------|-------------|-------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `github-token` | true        | N/A                                                                                 | A token with permission to download assets from repository releases. When downloading from the repository the action is running in `secrets.GITHUB_TOKEN` is sufficient.  If downloading from a separate repo, a different token with permission to that repo should be provided. |
-| `asset-name`   | true        | N/A                                                                                 | The name of the release asset.                                                                                                                                                                                                                                                    |
-| `tag-name`     | true        | N/A                                                                                 | The tag associated with the release that contains the asset to download. You may also use the tag name `latest`.                                                                                                                                                                  |
-| `repository`   | false       | `github.repository`<br/> <i>The organization/repository where the action is run</i> | The organization/repository to download the release asset from.                                                                                                                                                                                                                   |
+| Parameter      | Is Required | Default             | Description                                                                                                                                                                                                                                    |
+|----------------|-------------|---------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `github-token` | true        | N/A                 | A token with permission to download assets from repository releases. When downloading from the repo the action runs from the `secrets.GITHUB_TOKEN` is sufficient.  If downloading from a separate repo a more privileged PAT will be required |
+| `asset-name`   | true        | N/A                 | The name of the release asset.                                                                                                                                                                                                                 |
+| `tag-name`     | true        | N/A                 | The tag associated with the release that contains the asset to download. You may also use the tag name `latest`.                                                                                                                               |
+| `repository`   | false       | `github.repository` | The organization/repository to download the release asset from.                                                                                                                                                                                |
 
 ## Outputs
 
-| Name                 | Description                           |
-|----------------------|---------------------------------------|
-| `download-file-path` | Absolute path to the downloaded asset |
+| Name                 | Description                                                                                                                                                                                                                                                                                    |
+|----------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `download-file-path` | Absolute path to the downloaded asset                                                                                                                                                                                                                                                          |
+| `error-condition`    | String containing a short error description:<br>•&nbsp;Release with tag does not exist<br>•&nbsp;Unknown error getting release<br>•&nbsp;No assets match the name<br>•&nbsp;Release does not have assets<br>•&nbsp;Asset download failed<br>•&nbsp;Writing to file failed |
 
 ## Usage Examples
 
@@ -43,7 +45,7 @@ deploy-code:
     steps:
       - name: Download artifacts from release
         # You may also reference just the major or major.minor version
-        uses: im-open/download-release-asset@v1.2.1
+        uses: im-open/download-release-asset@v1.3.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           asset-name: ${{ env.ASSET_ZIP }}
@@ -54,13 +56,12 @@ deploy-code:
 
       # ----
       - name: Download artifacts from latest release in a different repo
-        uses: im-open/download-release-asset@v1.2.1
+        uses: im-open/download-release-asset@v1.3.0
         with:
           github-token: ${{ secrets.PERSONAL_PAT }} # GitHub PAT that has permissions to the org/repo
           asset-name: ${{ env.ASSET_ZIP }}
           tag-name: latest
           repository: im-enrollment/repo-with-release
-
      ...
 ```
 
@@ -70,6 +71,7 @@ When creating PRs, please review the following guidelines:
 
 - [ ] The action code does not contain sensitive information.
 - [ ] At least one of the commit messages contains the appropriate `+semver:` keywords listed under [Incrementing the Version] for major and minor increments.
+- [ ] The action has been recompiled.  See [Recompiling Manually] for details.
 - [ ] The README.md has been updated with the latest version of the action.  See [Updating the README.md] for details.
 
 ### Incrementing the Version
@@ -88,9 +90,18 @@ This repo uses [git-version-lite] in its workflows to examine commit messages to
 
 The files and directories that are considered source code are listed in the `files-with-code` and `dirs-with-code` arguments in both the [build-and-review-pr] and [increment-version-on-merge] workflows.  
 
-If a PR contains source code changes, the README.md should be updated with the latest action version.  The [build-and-review-pr] workflow will ensure these steps are performed when they are required.  The workflow will provide instructions for completing these steps if the PR Author does not initially complete them.
+If a PR contains source code changes, the README.md should be updated with the latest action version and the action should be recompiled.  The [build-and-review-pr] workflow will ensure these steps are performed when they are required.  The workflow will provide instructions for completing these steps if the PR Author does not initially complete them.
 
-If a PR consists solely of non-source code changes like changes to the `README.md` or workflows under `./.github/workflows`, version updates do not need to be performed.
+If a PR consists solely of non-source code changes like changes to the `README.md` or workflows under `./.github/workflows`, version updates and recompiles do not need to be performed.
+
+### Recompiling Manually
+
+This command utilizes [esbuild] to bundle the action and its dependencies into a single file located in the `dist` folder.  If changes are made to the action's [source code], the action must be recompiled by running the following command:
+
+```sh
+# Installs dependencies and bundles the code
+npm run build
+```
 
 ### Updating the README.md
 
@@ -106,6 +117,7 @@ Copyright &copy; 2023, Extend Health, LLC. Code released under the [MIT license]
 
 <!-- Links -->
 [Incrementing the Version]: #incrementing-the-version
+[Recompiling Manually]: #recompiling-manually
 [Updating the README.md]: #updating-the-readmemd
 [source code]: #source-code-changes
 [usage examples]: #usage-examples

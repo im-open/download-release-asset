@@ -13,9 +13,7 @@ module.exports = async (github, core, releaseId) => {
       })
       .catch(() => {
         // errors can happen if the release doesn't exist.  We can ignore those.
-        core.info(
-          `\tRelease '${releaseId}' does not appear to exist - do nothing.`
-        );
+        core.info(`\tRelease '${releaseId}' does not appear to exist - do nothing.`);
       });
   } else {
     core.info(`\tReleaseId was not provided - do nothing.`);
