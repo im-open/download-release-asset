@@ -85,6 +85,7 @@ jobs:
       #--------------------------------------
       - name: '-------------------------------------------------------------------------------------------------------'
         run: echo ""
+      
       - name: Setup - Checkout the action
         uses: actions/checkout@v3
 
@@ -129,6 +130,7 @@ jobs:
       #--------------------------------------
       - name: '-------------------------------------------------------------------------------------------------------'
         run: echo ""
+      
       - name: When downloading an asset and providing a repo name
         uses: ./
         if: always()
@@ -159,6 +161,7 @@ jobs:
       #--------------------------------------
       - name: '-------------------------------------------------------------------------------------------------------'
         run: echo ""
+      
       - name: When downloading an asset without providing a repo name
         uses: ./
         if: always()
@@ -189,6 +192,7 @@ jobs:
       #-------------------------------------------------------------------
       - name: '-------------------------------------------------------------------------------------------------------'
         run: echo ""
+      
       - name: When an unknown error occurs downloading the asset
         uses: ./
         if: always()
@@ -215,6 +219,7 @@ jobs:
       #-------------------------------------------------------------------
       - name: '-------------------------------------------------------------------------------------------------------'
         run: echo ""
+      
       - name: When downloading an asset from an existing release that has no assets
         uses: ./
         if: always()
@@ -242,6 +247,7 @@ jobs:
       #-------------------------------------------------------------------
       - name: '-------------------------------------------------------------------------------------------------------'
         run: echo ""
+      
       - name: When downloading an asset that does not exist
         uses: ./
         if: always()
@@ -297,6 +303,7 @@ jobs:
       # --------------------------------------
       - name: '-------------------------------------------------------------------------------------------------------'
         run: echo ""
+
       - name: Teardown - Cleanup all the releases by deleting them
         if: always()
         uses: actions/github-script@v6
@@ -305,12 +312,13 @@ jobs:
             // Not all of these will end up with a tag and a release, but run them all just in case any of the tests 
             // fail unexpectedly.  We don't want a bunch of test releases and tags cluttering up the real thing.
 
-            const deleteReleaseFromGitHub = require('./test/api/delete-release-from-github.js')
+            const deleteReleaseFromGitHub = require('./test/teardown/delete-release-from-github.js')
             await deleteReleaseFromGitHub(github, core, '${{ steps.release.outputs.release-id }}');
             await deleteReleaseFromGitHub(github, core, '${{ steps.no-assets.outputs.release-id }}');
 
-            const deleteTagFromGitHub = require('./test/api/delete-tag-from-github.js')
+            const deleteTagFromGitHub = require('./test/teardown/delete-tag-from-github.js')
             await deleteTagFromGitHub(github, core, '${{ env.RELEASE_TAG }}');
             await deleteTagFromGitHub(github, core, '${{ env.NO_ASSETS_TAG }}');
+
       - name: '-------------------------------------------------------------------------------------------------------'
         run: echo ""
