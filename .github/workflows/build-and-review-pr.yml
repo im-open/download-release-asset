@@ -75,7 +75,7 @@ jobs:
 
       NO_ASSETS_TAG: ''
       RELEASE_TAG: ''
-      
+
       ASSET_1_NAME: ''
       ASSET_2_NAME: ''
 
@@ -83,9 +83,16 @@ jobs:
       #--------------------------------------
       # SETUP
       #--------------------------------------
+      - name: Fail test job if fork
+        run: |
+          if [ "${{ github.event.pull_request.head.repo.fork }}" == "true" ]; then
+            echo "This test job requires write scopes on GITHUB_TOKEN that PRs from forks will not have access to.  Before this PR can be merged, the tests should be run on an intermediate branch created by repository owners."
+            exit 1
+          fi
+
       - name: '-------------------------------------------------------------------------------------------------------'
         run: echo ""
-      
+
       - name: Setup - Checkout the action
         uses: actions/checkout@v3
 
@@ -104,7 +111,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           tag-name: ${{ env.NO_ASSETS_TAG }}
           commitish: ${{ env.COMMITISH }}
-      
+
       - name: Setup - Create a release with an asset
         uses: im-open/create-release@v3
         id: release
@@ -130,7 +137,7 @@ jobs:
       #--------------------------------------
       - name: '-------------------------------------------------------------------------------------------------------'
         run: echo ""
-      
+
       - name: When downloading an asset and providing a repo name
         uses: ./
         if: always()
@@ -161,7 +168,7 @@ jobs:
       #--------------------------------------
       - name: '-------------------------------------------------------------------------------------------------------'
         run: echo ""
-      
+
       - name: When downloading an asset without providing a repo name
         uses: ./
         if: always()
@@ -192,7 +199,7 @@ jobs:
       #-------------------------------------------------------------------
       - name: '-------------------------------------------------------------------------------------------------------'
         run: echo ""
-      
+
       - name: When an unknown error occurs downloading the asset
         uses: ./
         if: always()
@@ -206,20 +213,20 @@ jobs:
       - name: Then the outcome should be failure
         if: always()
         run: ./test/assert-values-match.sh --name "step outcome" --expected "failure" --actual "${{ steps.unknown-error.outcome }}"
-      
+
       - name: And the error-condition output should indicate an unknown error has occurred
         if: always()
-        run: | 
+        run: |
           ./test/assert-values-match.sh --name "error-condition" --expected "${{ env.ERROR_UNKNOWN }}" --actual "${{ steps.unknown-error.outputs.error-condition }}"
           ./test/assert-values-match.sh --name "download-file-path" --expected "" --actual "${{ steps.unknown-error.outputs.download-file-path }}"
           ./test/assert-values-match.sh --name "download_file_path" --expected "" --actual "${{ steps.unknown-error.outputs.download_file_path }}"
-      
+
       #-------------------------------------------------------------------
       # DOWNLOAD FROM AN EXISTING RELEASE THAT HAS NO ASSETS
       #-------------------------------------------------------------------
       - name: '-------------------------------------------------------------------------------------------------------'
         run: echo ""
-      
+
       - name: When downloading an asset from an existing release that has no assets
         uses: ./
         if: always()
@@ -234,20 +241,20 @@ jobs:
       - name: Then the outcome should be failure
         if: always()
         run: ./test/assert-values-match.sh --name "step outcome" --expected "failure" --actual "${{ steps.download-no-assets.outcome }}"
-      
+
       - name: And the error-condition output should indicate the release has no assets
         if: always()
-        run: | 
+        run: |
           ./test/assert-values-match.sh --name "error-condition" --expected "${{ env.ERROR_NO_ASSETS_ON_RELEASE }}" --actual "${{ steps.download-no-assets.outputs.error-condition }}"
           ./test/assert-values-match.sh --name "download-file-path" --expected "" --actual "${{ steps.download-no-assets.outputs.download-file-path }}"
           ./test/assert-values-match.sh --name "download_file_path" --expected "" --actual "${{ steps.download-no-assets.outputs.download_file_path }}"
-      
+
       #-------------------------------------------------------------------
       # DOWNLOAD FROM AN EXISTING RELEASE BUT AN ASSET THAT DOES NOT EXIST
       #-------------------------------------------------------------------
       - name: '-------------------------------------------------------------------------------------------------------'
         run: echo ""
-      
+
       - name: When downloading an asset that does not exist
         uses: ./
         if: always()
@@ -262,10 +269,10 @@ jobs:
       - name: Then the outcome should be failure
         if: always()
         run: ./test/assert-values-match.sh --name "step outcome" --expected "failure" --actual "${{ steps.non-existent-asset.outcome }}"
-      
+
       - name: And the error-condition output should indicate the asset does not exist
         if: always()
-        run: | 
+        run: |
           ./test/assert-values-match.sh --name "error-condition" --expected "${{ env.ERROR_ASSET_DOES_NOT_EXIST }}" --actual "${{ steps.non-existent-asset.outputs.error-condition }}"
           ./test/assert-values-match.sh --name "download-file-path" --expected "" --actual "${{ steps.non-existent-asset.outputs.download-file-path }}"
           ./test/assert-values-match.sh --name "download_file_path" --expected "" --actual "${{ steps.non-existent-asset.outputs.download_file_path }}"
@@ -290,10 +297,10 @@ jobs:
       - name: Then the outcome should be failure
         if: always()
         run: ./test/assert-values-match.sh --name "step outcome" --expected "failure" --actual "${{ steps.non-existent-release.outcome }}"
-      
+
       - name: And the error-condition output should indicate the release does not exist
         if: always()
-        run: | 
+        run: |
           ./test/assert-values-match.sh --name "error-condition" --expected "${{ env.ERROR_RELEASE_DOES_NOT_EXIST }}" --actual "${{ steps.non-existent-release.outputs.error-condition }}"
           ./test/assert-values-match.sh --name "download-file-path" --expected "" --actual "${{ steps.non-existent-release.outputs.download-file-path }}"
           ./test/assert-values-match.sh --name "download_file_path" --expected "" --actual "${{ steps.non-existent-release.outputs.download_file_path }}"
