@@ -1,2 +1,5 @@
 node_modules/
 /.vscode/launch.json
+.secret
+/pull-request.json
+my_test_asset_*.txt

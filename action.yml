@@ -18,38 +18,9 @@ inputs:
 outputs:
   download-file-path: 
     description: 'Full file path of download asset'
-    value: ${{ steps.download.outputs.download_file_path }}
+  error-condition:
+    description:  'Describes the error condition if the action fails'  
 
 runs:
-  using: 'composite'
-  steps:
-    - name: Download Asset
-      id: download
-      shell: bash
-      run: |
-        # Script to download asset file from tag release using GitHub API v3.
-        # See: http://stackoverflow.com/a/35688093/55075    
-
-        # Define variables.
-        name='${{ inputs.asset-name }}'
-        GH_REPO="https://api.github.com/repos/${{ inputs.repository || github.repository }}"
-        GH_TAGS="$GH_REPO/releases/${{ (inputs.tag-name == 'latest' && 'latest') || format('tags/{0}', inputs.tag-name) }}"
-        AUTH="Authorization: token ${{ inputs.github-token }}"
-        WGET_ARGS="--content-disposition --auth-no-challenge --no-cookie"
-        CURL_ARGS="-LJO#f"
-
-        # Read asset tags.
-        response=$(curl -sH "$AUTH" $GH_TAGS)
-
-        # Get ID of the asset based on given name.
-        eval $(echo "$response" | grep -C3 "name.:.\+$name" | grep -w id | tr : = | tr -cd '[[:alnum:]]=')
-        [ "$id" ] || { echo "Error: Failed to get asset id, response: $response" | awk 'length($0)<100' >&2; exit 1; }
-        GH_ASSET="$GH_REPO/releases/assets/$id"
-
-        # Download asset file.
-        echo "Downloading asset..." >&2
-        curl $CURL_ARGS -H "Authorization: token ${{ inputs.github-token }}" -H 'Accept: application/octet-stream' "$GH_ASSET"
-
-        base_path=$(pwd)
-        download_file_path="$base_path/${{ inputs.asset-name }}"
-        echo "download_file_path=$download_file_path" >> $GITHUB_OUTPUT
+  using: 'node16'
+  main: 'dist/index.js'
