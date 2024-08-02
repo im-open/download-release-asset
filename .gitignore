@@ -3,3 +3,4 @@ node_modules/
 .secret
 /pull-request.json
 my_test_asset_*.txt
+.DS_Store
