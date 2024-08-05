@@ -16,11 +16,11 @@ inputs:
     required: false
 
 outputs:
-  download-file-path: 
+  download-file-path:
     description: 'Full file path of download asset'
   error-condition:
-    description:  'Describes the error condition if the action fails'  
+    description:  'Describes the error condition if the action fails'
 
 runs:
-  using: 'node16'
+  using: 'node20'
   main: 'dist/index.js'

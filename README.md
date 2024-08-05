@@ -2,7 +2,7 @@
 
 This action can be used to download an asset from a GitHub release.  The GitHub release where the artifacts will be download from are identified by tag which is provided as an argument to the action.  The action downloads the release asset to the root of the workspace.
 
-## Index <!-- omit in toc -->
+## Index <!--  omit in toc  -->
 
 - [download-release-asset](#download-release-asset)
   - [Inputs](#inputs)
@@ -37,16 +37,16 @@ This action can be used to download an asset from a GitHub release.  The GitHub 
 
 ```yml
 deploy-code:
-    
+
     env:
-      ASSET_ZIP: 'published_app.zip' 
+      ASSET_ZIP: 'published_app.zip'
       UNZIPPED_ASSET: 'published_app'
       DEPLOY_ZIP: 'deploy.zip'
 
     steps:
       - name: Download artifacts from release
         # You may also reference just the major or major.minor version
-        uses: im-open/download-release-asset@v1.3.0
+        uses: im-open/download-release-asset@v1.4.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           asset-name: ${{ env.ASSET_ZIP }}
@@ -57,7 +57,7 @@ deploy-code:
 
       # ----
       - name: Download artifacts from latest release in a different repo
-        uses: im-open/download-release-asset@v1.3.0
+        uses: im-open/download-release-asset@v1.4.0
         with:
           github-token: ${{ secrets.PERSONAL_PAT }} # GitHub PAT that has permissions to the org/repo
           asset-name: ${{ env.ASSET_ZIP }}
@@ -90,7 +90,7 @@ This repo uses [git-version-lite] in its workflows to examine commit messages to
 
 ### Source Code Changes
 
-The files and directories that are considered source code are listed in the `files-with-code` and `dirs-with-code` arguments in both the [build-and-review-pr] and [increment-version-on-merge] workflows.  
+The files and directories that are considered source code are listed in the `files-with-code` and `dirs-with-code` arguments in both the [build-and-review-pr] and [increment-version-on-merge] workflows.
 
 If a PR contains source code changes, the README.md should be updated with the latest action version and the action should be recompiled.  The [build-and-review-pr] workflow will ensure these steps are performed when they are required.  The workflow will provide instructions for completing these steps if the PR Author does not initially complete them.
 
@@ -111,7 +111,7 @@ If changes are made to the action's [source code], the [usage examples] section 
 
 ### Tests
 
-The [build-and-review-pr] workflow includes tests which are linked to a status check. That status check needs to succeed before a PR is merged to the default branch.  When a PR comes from a branch, the `GITHUB_TOKEN` has the necessary permissions required to run the tests successfully.  
+The [build-and-review-pr] workflow includes tests which are linked to a status check. That status check needs to succeed before a PR is merged to the default branch.  When a PR comes from a branch, the `GITHUB_TOKEN` has the necessary permissions required to run the tests successfully.
 
 When a PR comes from a fork, the tests won't have the necessary permissions to run since the `GITHUB_TOKEN` only has `read` access for all scopes. When a PR comes from a fork, the changes should be reviewed, then merged into an intermediate branch by repository owners so tests can be run against the PR changes.  Once the tests have passed, changes can be merged into the default branch.
 
@@ -132,3 +132,4 @@ Copyright &copy; 2023, Extend Health, LLC. Code released under the [MIT license]
 [build-and-review-pr]: ./.github/workflows/build-and-review-pr.yml
 [increment-version-on-merge]: ./.github/workflows/increment-version-on-merge.yml
 [git-version-lite]: https://github.com/im-open/git-version-lite
+
