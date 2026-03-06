@@ -65,6 +65,9 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write
+
     env:
       # COMMITISH: '574597c0dfddc1fd1abcb99f368b156c78dadbe0' # v1.2.1
       COMMITISH: 'b1abda215613c5ffad9e2975cada5edb7eeb2c56' # v1.3.0
