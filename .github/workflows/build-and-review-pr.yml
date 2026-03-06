@@ -110,32 +110,70 @@ jobs:
           echo "ASSET_2_NAME=my_test_asset_2_$tag.txt" >> $GITHUB_ENV
 
       - name: Setup - Create a release with no assets
-        uses: im-open/create-release@v3
         id: no-assets
+        uses: actions/github-script@v7
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          tag-name: ${{ env.NO_ASSETS_TAG }}
-          commitish: ${{ env.COMMITISH }}
+          script: |
+            const response = await github.rest.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: process.env.NO_ASSETS_TAG,
+              target_commitish: process.env.COMMITISH,
+              name: process.env.NO_ASSETS_TAG,
+              body: '',
+              draft: false,
+              prerelease: false
+            });
+            core.setOutput('release-id', response.data.id);
+            core.setOutput('release-html-url', response.data.html_url);
+            core.setOutput('asset-upload-url', response.data.upload_url);
 
       - name: Setup - Create a release with an asset
-        uses: im-open/create-release@v3
         id: release
+        uses: actions/github-script@v7
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          tag-name: ${{ env.RELEASE_TAG }}
-          commitish: ${{ env.COMMITISH }}
-          asset-path: './test/files/test-asset-1.txt'
-          asset-name: ${{ env.ASSET_1_NAME }}
-          asset-content-type: 'application/text'
+          script: |
+            const fs = require('fs');
+            const response = await github.rest.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: process.env.RELEASE_TAG,
+              target_commitish: process.env.COMMITISH,
+              name: process.env.RELEASE_TAG,
+              body: '',
+              draft: false,
+              prerelease: false
+            });
+            core.setOutput('release-id', response.data.id);
+            core.setOutput('release-html-url', response.data.html_url);
+            core.setOutput('asset-upload-url', response.data.upload_url);
+
+            const fileData = fs.readFileSync('./test/files/test-asset-1.txt');
+            await github.rest.repos.uploadReleaseAsset({
+              url: response.data.upload_url,
+              headers: {
+                'content-type': 'text/plain',
+                'content-length': fileData.length
+              },
+              name: process.env.ASSET_1_NAME,
+              data: fileData
+            });
 
       - name: Setup - Upload a second asset
-        uses: im-open/upload-release-asset@v1
+        uses: actions/github-script@v7
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          upload-url: ${{ steps.release.outputs.asset-upload-url }}
-          asset-path: './test/files/test-asset-2.txt'
-          asset-name: ${{ env.ASSET_2_NAME }}
-          asset-content-type: 'application/text'
+          script: |
+            const fs = require('fs');
+            const fileData = fs.readFileSync('./test/files/test-asset-2.txt');
+            await github.rest.repos.uploadReleaseAsset({
+              url: '${{ steps.release.outputs.asset-upload-url }}',
+              headers: {
+                'content-type': 'text/plain',
+                'content-length': fileData.length
+              },
+              name: process.env.ASSET_2_NAME,
+              data: fileData
+            });
 
       #--------------------------------------
       # DOWNLOAD WITH A REPO NAME
